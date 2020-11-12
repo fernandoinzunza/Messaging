@@ -1,0 +1,109 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+</head>
+
+<body class="grey lighten-2">
+
+    <style>
+        .input-field input[type=text] {
+            border: 1px solid #cfd8dc;
+            border-radius: 1px;
+        }
+        .input-field input[type=text]:focus {
+            border: 2px solid #26a69a;
+            border-radius: 1px;
+        }
+        .input-field input[type=password]:focus {
+            border: 2px solid #26a69a;
+            border-radius: 1px;
+        }
+        .input-field input[type=password] {
+            border: 1px solid #cfd8dc;
+            border-radius: 1px;
+        }
+
+        .input-field label {
+            margin-left: 0.4rem;
+            background: white;
+        }
+
+        #label-pass {
+            max-width: 4.2rem;
+        }
+
+        #label-phone {
+            max-width: 6.8rem;
+        }
+
+        .centrado {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <!--
+          <div style="background-color:red; height: 200px; width:400px; position:absolute; z-index:0">rojo</div>
+      <div style="background-color:green; height: 200px; width:400px; position:absolute; top:50px; left:40px; z-index:1">verde</div>
+    -->
+    <div class="row teal lighten-2" style="height: 8rem; width: 100%; position: absolute; z-index: 0 "></div>
+    <!--<div style="height:8rem; top: 3rem; left: 0;right: 0; position:absolute; z-index:1"></div>-->
+
+    <div class="container" style="        height: 8rem;
+        top: 3rem;
+        left: 0;
+        right: 0;
+        position: absolute;
+        z-index: 1;
+">
+        <div class="col s12">
+            <div class="card-panel white">
+                <form method="post" asp-action="Auth" asp-controller="Login">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row" style="text-align:center; margin-top: 2rem; padding-left: 3rem; padding-right: 3rem">
+                        <img class="responsive-img" src="https://i.pinimg.com/originals/79/dc/31/79dc31280371b8ffbe56ec656418e122.png" style="max-height:5rem">
+                        <h5 style="margin-top:0">
+                            Sign in
+                        </h5>
+                        <p style="margin-bottom: 2rem;">to continue to Whatsapp Web</p>
+                        <div class="input-field">
+                            <input id="phone" name="phone" type="text" class="validate">
+                            <label id="label-phone" for="phone">Phone number</label>
+                        </div>
+                        <div class="input-field">
+                            <input id="password" name="password" type="password" class="validate">
+                            <label id="label-pass" for="password">Password</label>
+                        </div>
+                        <p class="red-text">@TempData["message"]</p>
+                    </div>
+                    <div class="row center">
+                        <div class="col s12 m6">
+                            <button type="submit" class="waves-effect waves-light btn" id="login" style="width:50%">Next</button>
+                        </div>
+                        <div class="col s12 m6">
+                            <a href="/Registro/Nuevo">Create account</a>
+                        </div>
+                    </div>
+                </form>
+                @*<div class="row centrado">
+                    <a class="btn-floating btn-large waves-effect waves-light red"><i class="fa fa-google"></i></a>
+                </div>*@
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+

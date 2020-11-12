@@ -1,0 +1,352 @@
+﻿@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    Layout = "Dashboard";
+}
+<audio id="notificacion">
+    <source src="~/js/tono.mp3" type="audio/mp3">
+</audio>
+
+<input type="hidden" id="telSession" value='@HttpContextAccessor.HttpContext.Session.GetString("telefono")' />
+<input type="hidden" id="nombreSession" value="@HttpContextAccessor.HttpContext.Session.GetString("nombre")" />
+<input type="hidden" id="destinoFocused" name="" value="" />
+<style>
+    li a {
+        display: inline-block;
+        height: 100%;
+        width: 100%;
+    }
+
+    .left-p {
+        padding-left: 0.7rem !important;
+        padding-right: 0 !important;
+    }
+
+    .no-mt {
+    }
+
+    .right-p {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        padding-left: 0rem !important;
+        padding-right: 0.7rem !important;
+    }
+
+    .col .collection {
+        padding: 0;
+        margin: 0 !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+    .fixed-action-btn {
+        right: auto;
+        left: auto;
+        margin-left: 1.5rem;
+        bottom: auto;
+    }
+
+        .fixed-action-btn ul {
+            bottom: 40px;
+        }
+</style>
+<div class="row no-mt" style="height:100%">
+    <div class="col s4 left-p">
+        <ul class="collection">
+            @foreach (var per in ViewData["personas"] as IList<Personas>)
+            {
+                var content = "";
+                var fecha = "";
+                bool existe = false;
+                var yo = false;
+                var entregado = false;
+                var visto = false;
+                var contMensajesPendientes = 0;
+                var tipo = "";
+                foreach (var conectado in ViewData["conectados"] as IList<Conectado>)
+                {
+                    if (per.Phone == conectado.Telefono)
+                    {
+                        existe = true;
+                    }
+                }
+                if (existe)
+                {
+
+                    <li class="collection-item avatar" style="height: 100%; padding-top:1.2rem; position:relative;" id="li-@per.Phone">
+                        <a href="#" data-id="@per.Phone" id="data-select">
+                            <img src="https://jeffjbutler.com/wp-content/uploads/2018/01/default-user.png" style="" alt="" class="circle responsive-img">
+                            <span class="title" style="font-size:medium; color:black">@per.FirstName</span>
+                            <p style="font-size:smaller;" class="grey-text lighten-1">
+                                @foreach (var mensaje in ViewData["mensajes"] as IList<Mensaje>)
+                                {
+                                    if (mensaje.Emisor == HttpContextAccessor.HttpContext.Session.GetString("telefono") && mensaje.Receptor == per.Phone || mensaje.Receptor == HttpContextAccessor.HttpContext.Session.GetString("telefono") && per.Phone == mensaje.Emisor)
+                                    {
+
+                                        if (mensaje.Emisor == HttpContextAccessor.HttpContext.Session.GetString("telefono"))
+                                        {
+                                            yo = true;
+                                            if (mensaje.Estado == "Enviado")
+                                            {
+                                                entregado = false;
+                                                visto = false;
+                                            }
+                                            else if (mensaje.Estado == "Entregado")
+                                            {
+                                                entregado = true;
+                                                visto = false;
+                                            }
+                                            else if (mensaje.Estado == "Visto")
+                                            {
+                                                visto = true;
+                                                entregado = false;
+                                            }
+                                        }
+
+                                        content = mensaje.Contenido;
+                                        tipo = mensaje.Tipo;
+                                        if (content != "")
+                                        {
+                                            var conversion = Convert.ToDateTime(mensaje.FechaEnviado);
+                                            var resta = DateTime.Now.Subtract(conversion);
+                                            var hoy = DateTime.Now;
+                                            var tiempoTranscurrido = (hoy - conversion);
+                                            if ((hoy - conversion).TotalDays < 1)
+                                            {
+                                                if ((hoy - conversion).Hours >= 1)
+                                                    fecha = (hoy - conversion).Hours.ToString() + "hours ago";
+                                                else if ((hoy - conversion).Minutes >= 1)
+                                                    fecha = (hoy - conversion).Minutes.ToString() + " minutes ago";
+                                                else
+                                                    fecha = "Few secs. ago";
+
+
+                                            }
+                                            else if (tiempoTranscurrido.TotalDays > 1 && tiempoTranscurrido.TotalDays < 2)
+                                            {
+                                                fecha = "Yesterday";
+                                            }
+                                            else if (tiempoTranscurrido.TotalHours < 168)
+                                            {
+                                                fecha = conversion.DayOfWeek.ToString();
+                                            }
+                                            else
+                                            {
+                                                fecha = conversion.Month.ToString() + "/" + conversion.Day.ToString() + "/" + conversion.Year.ToString();
+                                            }
+
+                                        }
+
+                                        break;
+                                    }
+
+                                }
+                                @{
+                                    var context = new chatwebContext();
+                                    contMensajesPendientes = context.Mensajes.Where(x => x.Receptor == HttpContextAccessor.HttpContext.Session.GetString("telefono") && x.Emisor == per.Phone && x.Estado == "Entregado" || x.Receptor == HttpContextAccessor.HttpContext.Session.GetString("telefono") && x.Emisor == per.Phone && x.Estado == "Enviado").Count();
+                                }
+                                @if (yo)
+                                {
+                                    if (entregado)
+                                    {
+                                        if (tipo == "Texto")
+                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons'>done_all</i>" + content + "</div>")
+                                            else if (tipo == "Imagen")
+                                                @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons'>done_all</i>" + "Sent a image" + "</div>")
+
+                                            }
+                                            else if (visto)
+                                            {
+                                                if (tipo == "Texto")
+                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + content + "</div>")
+                                                    else if (tipo == "Imagen")
+                                                        @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + "Sent an image" + "</div>")
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (tipo == "Texto")
+                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + content + "</div>")
+                                                            else
+                                                                @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + "Sent an image" + "</div>")
+
+                                                            }
+                                                        }
+                                                        else if (content != "" && !yo)
+                                                        {
+                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>" + content + "</div>")
+                                                        }
+                                                        else if (content == "" && tipo == "Imagen" && !yo)
+                                                        {
+                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate' style='font-style:italic'>" + "Sent you an image" + "</div>")
+                                                        }
+                                                        else
+                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>Hello there! I'm using Whatsapp</div>")
+
+                            </p>
+                            <span style="font-size:x-small;margin-top:0.4rem;" class="secondary-content grey-text lighten-1"> @fecha</span>
+                            @if (contMensajesPendientes > 0)
+                                @Html.Raw("<span id='contMensajes-" + per.Phone + "' class='new badge green scale-transition' data-badge-caption='" + contMensajesPendientes + "' data-status='activo' style='position:absolute; right:1.2rem; border-radius:1rem; color:white; bottom:1.2rem;'>" + "</span>")
+                                else
+                                    @Html.Raw("<span class='' id='contMensajes-" + per.Phone + "' style='position:absolute; right:1.2rem; border-radius:1rem; data-badge-caption='' color:white; bottom:1.2rem;' data-status='inactivo'></span>")
+                        </a>
+                    </li>
+                }
+
+            }
+        </ul>
+    </div>
+    <style>
+        .enviados {
+            margin-bottom: 0.1rem !important;
+        }
+
+        .recibidos {
+            margin-bottom: 0.1rem !important;
+        }
+    </style>
+    <div class="col s8 right-p no-mt">
+        <header id="header-online" class="grey lighten-2" style="height:4.5rem; padding-top:0.75rem;">
+        </header>
+        <div id="messages-list" class="lime lighten-4" style="overflow-y: scroll; height:35.5rem; padding: 3rem;">
+            <!-- Stream video via webcam -->
+            @**@
+
+        </div>
+        <div class="grey lighten-2" style="height:4.1rem">
+            <div class="row">
+                <div class="col s2 m2 l1">
+                    <div class="fixed-action-btn">
+                        <a class="center transparent" id="document" style="color:black;margin-top:1.5rem;margin-left:0.5rem;border:none; cursor:pointer;"><span class="material-icons">attach_file</span></a>
+                        <ul>
+                            <li>
+                                <input id="input-photos" type="file" style="display:none" />
+                                <a id="anchor-photos" class="btn-floating purple tooltipped" data-position="right" data-tooltip="Photos & Videos"><i class="material-icons">insert_photo</i></a>
+                            </li>
+                            <li>
+                                <a class="btn-floating red darken-1 tooltipped" data-position="right" data-tooltip="Camera" id="camara"><i class="material-icons">camera_alt</i></a>
+                            </li>
+                            <li>
+                                <input id="input-file" type="file" style="display:none" />
+                                <a id="anchor-file" class="btn-floating blue tooltipped" data-position="right" data-tooltip="Document"><i class="material-icons">insert_drive_file</i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col s8 m9 l10" style="">
+                    <input id="mensaje" type="text" style="background:white; margin:0.5rem; border-radius:4px" name="name" value="" placeholder="Type a message" />
+                </div>
+                <div class="col s2 m1 l1">
+                    <button class="center transparent" style="margin-top:0.8rem; margin-left:0.5rem; border:none; cursor:pointer;" id="sendMessage"><span class="material-icons" style="margin-top:0.5rem;">send</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    div#modal2, #modal-documents {
+        width: 75%;
+        height: 75vh;
+        right: 0;
+        left: 0;
+        margin: auto;
+    }
+
+    .modal.bottom-sheet {
+        max-height: 80%;
+    }
+
+    #r-encabezado, #enviarFoto {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    #r-paginas {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    #rengLista {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    #add-files li {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+</style>
+<div id="modal2" class="modal bottom-sheet">
+    <div id="divCamara">
+        <div class="green row" id="r-encabezado" style="height:3rem; margin-bottom:0;">
+            <div class="col s6">
+                <a href="#" id="closeCamera"> <span class="material-icons left" style="margin-top:0.8rem; margin-left:0.4rem; color:white;">close</span></a>
+                <h6 style="color:white; padding-left:1rem; padding-top:0.2rem">Take a photo</h6>
+            </div>
+            <div class="col s6">
+                <a id="retake" class="right" href="#" style="color:white; font-size:large; margin-top:0.7rem; margin-right:1rem"><span class="material-icons">arrow_back</span></a>
+            </div>
+        </div>
+        <div class="video-wrap" style="position:relative; z-index:1;">
+            <div style="position:absolute;z-index:2; left:0; right:0;" class="center">
+                <video id="video" playsinline autoplay></video>
+            </div>
+            <div style="position: absolute;z-index:3;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                <button id="snap" class="green btn-floating center"><i class="material-icons">camera_alt</i></button>
+            </div>
+        </div>
+        <canvas id="canvas" style="padding: 0; margin: auto; display: block;" width="720" height="480"></canvas>
+        <div id="enviarFoto" class="row">
+            <div class="input-field col s6 offset-s3">
+                <input id="texto-imagen" type="text" class="validate">
+                <label for="texto-imagen" id="labelImagen">Add a caption</label>
+                <input type="hidden" id="image-taken-route" value="" />
+            </div>
+            <div class="col s3">
+                <a class="btn-floating btn-large waves-effect waves-light green" id="btnEnviarFoto"><i class="material-icons">send</i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-documents" class="modal bottom-sheet grey lighten-3">
+    <div class="green row" id="r-encabezado" style="height:3rem; margin-bottom:0;">
+        <div class="col s6">
+            <a href="#" id="closeModalDocument"> <span class="material-icons left" style="margin-top:0.8rem; margin-left:0.4rem; color:white;">close</span></a>
+            <h6 style="color:white; padding-left:1rem; padding-top:0.2rem">Preview</h6>
+        </div>
+        <div class="col s6">
+        </div>
+    </div>
+    <canvas id="previa" width="480" height="360" style="padding: 0; margin: auto; display: block; margin-top: 2rem;"></canvas>
+    <div class="row center" id="r-paginas">
+        <p id="pages-count"></p>
+    </div>
+    @*<a class="btn-floating btn-large waves-effect waves-light green" style="position:absolute; z-index:1004; right:2rem; bottom:0.05rem;"><i class="material-icons">send</i></a>*@
+    <div class="center grey lighten-2">
+        @*<button id="add-file-btn" class="btn white blue-text" style="width:5rem;height:5rem; margin-top:1rem;"><i class="large material-icons">add</i></button>*@
+        <div class="row" id="rengLista">
+            <div class="col s12" style="display:inline-flex; padding-bottom:1rem;">
+                    <ul id="add-files" style="margin-left:auto">
+                    </ul>
+                    <div id="add-file-btn" role="button" style="cursor:pointer; margin-right:auto;background-color: white; color: blue;width: 8rem;height:8rem;margin-top:1rem; font-weight:bolder"><span class="material-icons" style="margin-top:2rem;">add</span><div style="margin-bottom:auto">ADD FILE</div></div>  
+            </div>
+        </div>      
+    </div>
+</div>

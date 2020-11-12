@@ -1,0 +1,62 @@
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ChatWebW</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
+    <script src="~/js/AgregarPersona.js"></script>
+
+
+</head>
+<body class="grey lighten-2">
+    <input type="hidden" id="RequestVerificationToken"
+           name="RequestVerificationToken" value="@GetAntiXsrfRequestToken()">
+    <style>
+
+        .centrado {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <!--
+          <div style="background-color:red; height: 200px; width:400px; position:absolute; z-index:0">rojo</div>
+      <div style="background-color:green; height: 200px; width:400px; position:absolute; top:50px; left:40px; z-index:1">verde</div>
+    -->
+    <div class="row teal lighten-2" style="height:8rem; width:100%; position:absolute; z-index:0"></div>
+    <!--<div style="height:8rem; top: 3rem; left: 0;right: 0; position:absolute; z-index:1"></div>-->
+    <div class="container" style="height:8rem;top: 3rem; left: 0;right: 0; position:absolute; z-index:1;">
+        <div class="col s12">
+            <div id="panel" class="card-panel white">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <h4>Mensaje del sistema</h4>
+            <p id="mens">A bunch of text</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Got it!</a>
+        </div>
+    </div>
+</body>
+</html>
+
