@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Collections;
 
 namespace Messaging.Chathubs
 {
@@ -76,7 +78,6 @@ namespace Messaging.Chathubs
             var remitente = context.Conectados.Where(x => x.IdConexion == Context.ConnectionId).First();
             var persona = context.Personas.Where(x => x.Phone == remitente.Telefono).First();
             var mensaje = new Mensaje();
-
             mensaje.Emisor = remitente.Telefono;
             mensaje.Receptor = destino.Telefono;
             mensaje.FechaEnviado = DateTime.Now.ToString();
@@ -223,6 +224,52 @@ namespace Messaging.Chathubs
             mensaje.Ruta = url;
             context.Mensajes.Add(mensaje);
             context.SaveChanges();
+        }
+        public void EnviarArchivos(List<string>archivos,string destino, string yo)
+        {
+            var context = new chatwebContext();
+            var dest = context.Conectados.Where(x => x.Telefono == destino).First();
+            var remitente = context.Conectados.Where(y => y.Telefono == yo).First();
+            for (int i = 0; i < archivos.Count; i++)
+            {
+                var mensaje = new Mensaje
+                {
+                    Emisor = yo,
+                    Receptor = destino,
+                    FechaEnviado = DateTime.Now.ToString(),
+                    Hora = DateTime.Now.ToShortTimeString(),
+                    Estado = "Enviado",
+                    Tipo = "Documento",
+                    Ruta = archivos[i]  
+                };
+                context.Mensajes.Add(mensaje);
+                context.SaveChanges();
+                Typing typing = new Typing { Kind = "Documento", Message = "", State = "Sent", Url = archivos[i] };
+                Clients.Client(dest.IdConexion).SendAsync("ReceiveMessage", yo, typing);
+            }
+            
+            
+        }
+        public void SendDisconnectedFiles(List<string> archivos, string destino, string yo)
+        {
+            var context = new chatwebContext();
+            var dest = context.Conectados.Where(x => x.Telefono == destino).First();
+            var remitente = context.Conectados.Where(y => y.Telefono == yo).First();
+            for (int i = 0; i < archivos.Count; i++)
+            {
+                var mensaje = new Mensaje
+                {
+                    Emisor = yo,
+                    Receptor = destino,
+                    FechaEnviado = DateTime.Now.ToString(),
+                    Hora = DateTime.Now.ToShortTimeString(),
+                    Estado = "Enviado",
+                    Tipo = "Documento",
+                    Ruta = archivos[i]
+                };
+                context.Mensajes.Add(mensaje);
+                context.SaveChanges();              
+            }
         }
     }
 }

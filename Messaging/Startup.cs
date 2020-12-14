@@ -157,6 +157,13 @@ namespace Messaging
                     pattern: "{controller=Dash}/{action=MarcarComoLeido}/{id?}");
                 endpoints.MapRazorPages();
             });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "EnviarArchivos",
+                    pattern: "{controller=Dash}/{action=EnviarMultiplesArchivos}/{id?}");
+                endpoints.MapRazorPages();
+            });
 
         }
     }

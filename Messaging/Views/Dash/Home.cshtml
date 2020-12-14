@@ -18,7 +18,7 @@
     }
 
     .left-p {
-        padding-left: 0.7rem !important;
+        padding-left: 0 !important;
         padding-right: 0 !important;
     }
 
@@ -57,19 +57,23 @@
         }
 
     .fixed-action-btn {
-        right: auto;
-        left: auto;
-        margin-left: 1.5rem;
+        position: unset;
         bottom: auto;
     }
 
         .fixed-action-btn ul {
-            bottom: 40px;
+            bottom: 60px;
+            left: auto;
+            right: auto;
         }
+
+    .no-btm {
+        margin-bottom: 0;
+    }
 </style>
-<div class="row no-mt" style="height:100%">
+<div class="row no-mt no-btm" style="height: 100%; margin-left:0!important;margin-right:0!important">
     <div class="col s4 left-p">
-        <ul class="collection">
+        <ul class="collection" style="height:100%" id="ul-izq">
             @foreach (var per in ViewData["personas"] as IList<Personas>)
             {
                 var content = "";
@@ -80,6 +84,7 @@
                 var visto = false;
                 var contMensajesPendientes = 0;
                 var tipo = "";
+                var archivo = "";
                 foreach (var conectado in ViewData["conectados"] as IList<Conectado>)
                 {
                     if (per.Phone == conectado.Telefono)
@@ -91,8 +96,8 @@
                 {
 
                     <li class="collection-item avatar" style="height: 100%; padding-top:1.2rem; position:relative;" id="li-@per.Phone">
-                        <a href="#" data-id="@per.Phone" id="data-select">
-                            <img src="https://jeffjbutler.com/wp-content/uploads/2018/01/default-user.png" style="" alt="" class="circle responsive-img">
+                        <a href="#" class="truncate" data-id="@per.Phone" id="data-select">
+                            <img  src="https://jeffjbutler.com/wp-content/uploads/2018/01/default-user.png" style="" alt="" class="circle responsive-img imagen-avatar">
                             <span class="title" style="font-size:medium; color:black">@per.FirstName</span>
                             <p style="font-size:smaller;" class="grey-text lighten-1">
                                 @foreach (var mensaje in ViewData["mensajes"] as IList<Mensaje>)
@@ -122,6 +127,7 @@
 
                                         content = mensaje.Contenido;
                                         tipo = mensaje.Tipo;
+                                        archivo = mensaje.Ruta;
                                         if (content != "")
                                         {
                                             var conversion = Convert.ToDateTime(mensaje.FechaEnviado);
@@ -170,38 +176,46 @@
                                             @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons'>done_all</i>" + content + "</div>")
                                             else if (tipo == "Imagen")
                                                 @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons'>done_all</i>" + "Sent a image" + "</div>")
+                                                else if (tipo == "Documento")
+                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons'>done_all</i>" + archivo + "</div>")
 
-                                            }
-                                            else if (visto)
-                                            {
-                                                if (tipo == "Texto")
-                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + content + "</div>")
-                                                    else if (tipo == "Imagen")
-                                                        @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + "Sent an image" + "</div>")
-
-                                                    }
-                                                    else
-                                                    {
-                                                        if (tipo == "Texto")
-                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + content + "</div>")
-                                                            else
-                                                                @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + "Sent an image" + "</div>")
+                                                }
+                                                else if (visto)
+                                                {
+                                                    if (tipo == "Texto")
+                                                        @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + content + "</div>")
+                                                        else if (tipo == "Imagen")
+                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + "Sent an image" + "</div>")
+                                                            else if (tipo == "Documento")
+                                                            {
+                                                                @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: blue'>done_all</i>" + archivo + "</div>")
 
                                                             }
                                                         }
-                                                        else if (content != "" && !yo)
-                                                        {
-                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>" + content + "</div>")
-                                                        }
-                                                        else if (content == "" && tipo == "Imagen" && !yo)
-                                                        {
-                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate' style='font-style:italic'>" + "Sent you an image" + "</div>")
-                                                        }
                                                         else
-                                                            @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>Hello there! I'm using Whatsapp</div>")
+                                                        {
+                                                            if (tipo == "Texto")
+                                                                @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + content + "</div>")
+                                                                else if (tipo == "Imagen")
+                                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + "Sent an image" + "</div>")
+                                                                    else if (tipo == "Documento")
+                                                                        @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'><i class='tiny material-icons' style='color: grey'>check</i>" + archivo + "</div>")
+
+                                                                    }
+                                                                }
+                                                                else if (content != "" && !yo)
+                                                                {
+                                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>" + content + "</div>")
+                                                                }
+                                                                else if (content == "" && tipo == "Imagen" && !yo)
+                                                                {
+                                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate' style='font-style:italic'>" + "Sent you an image" + "</div>")
+                                                                }
+                                                                else
+                                                                    @Html.Raw("<div id='ult-" + @per.Phone + "' class='grey-text lighten-1 truncate'>Hello there! I'm using Whatsapp</div>")
 
                             </p>
-                            <span style="font-size:x-small;margin-top:0.4rem;" class="secondary-content grey-text lighten-1"> @fecha</span>
+                            <span style="font-size:x-small;float:left;" class="truncate secondary-content grey-text lighten-1 hide-on-med-and-down"> @fecha</span>
                             @if (contMensajesPendientes > 0)
                                 @Html.Raw("<span id='contMensajes-" + per.Phone + "' class='new badge green scale-transition' data-badge-caption='" + contMensajesPendientes + "' data-status='activo' style='position:absolute; right:1.2rem; border-radius:1rem; color:white; bottom:1.2rem;'>" + "</span>")
                                 else
@@ -222,22 +236,22 @@
             margin-bottom: 0.1rem !important;
         }
     </style>
-    <div class="col s8 right-p no-mt">
+    <div class="col s8 right-p no-mt" style="padding-right:0!important;">
         <header id="header-online" class="grey lighten-2" style="height:4.5rem; padding-top:0.75rem;">
         </header>
-        <div id="messages-list" class="lime lighten-4" style="overflow-y: scroll; height:35.5rem; padding: 3rem;">
+        <div id="messages-list" class="lime lighten-4" style="overflow: auto; height:35.5rem; padding: 3rem;">
             <!-- Stream video via webcam -->
             @**@
 
         </div>
         <div class="grey lighten-2" style="height:4.1rem">
-            <div class="row">
-                <div class="col s2 m2 l1">
-                    <div class="fixed-action-btn">
-                        <a class="center transparent" id="document" style="color:black;margin-top:1.5rem;margin-left:0.5rem;border:none; cursor:pointer;"><span class="material-icons">attach_file</span></a>
+            <div class="row no-btm" style="margin-left:0!important; margin-right:0!important">
+                <div class="col s2 m1 l1" style="height:59px">
+                    <div class="fixed-action-btn" style="height:100%; width:100%;">
+                        <a class="center transparent material-icons" id="document" style="color:black;border:none; cursor:pointer;">attach_file</a>
                         <ul>
                             <li>
-                                <input id="input-photos" type="file" style="display:none" />
+                                <input id="input-photos" type="file" style="display:none; " accept="image/*,video/*" />
                                 <a id="anchor-photos" class="btn-floating purple tooltipped" data-position="right" data-tooltip="Photos & Videos"><i class="material-icons">insert_photo</i></a>
                             </li>
                             <li>
@@ -253,15 +267,15 @@
                 <div class="col s8 m9 l10" style="">
                     <input id="mensaje" type="text" style="background:white; margin:0.5rem; border-radius:4px" name="name" value="" placeholder="Type a message" />
                 </div>
-                <div class="col s2 m1 l1">
-                    <button class="center transparent" style="margin-top:0.8rem; margin-left:0.5rem; border:none; cursor:pointer;" id="sendMessage"><span class="material-icons" style="margin-top:0.5rem;">send</span></button>
+                <div class="col s2 m2 l1">
+                    <button class="transparent material-icons" style="height: 58px;width:2rem;border:none;cursor:pointer;" id="sendMessage">send</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <style>
-    div#modal2, #modal-documents {
+    div#modal2, #modal-documents,#modal-media {
         width: 75%;
         height: 75vh;
         right: 0;
@@ -273,7 +287,7 @@
         max-height: 80%;
     }
 
-    #r-encabezado, #enviarFoto {
+    #r-encabezado,#r-encabezado-media, #enviarFoto {
         margin-left: 0;
         margin-right: 0;
     }
@@ -282,7 +296,8 @@
         margin-left: 0;
         margin-right: 0;
     }
-    #rengLista {
+
+    #rengLista,#rengLista-media {
         margin-left: 0;
         margin-right: 0;
     }
@@ -290,6 +305,21 @@
     #add-files li {
         padding-top: 1rem;
         padding-bottom: 1rem;
+    }
+
+    .material-icons.md-48 {
+        font-size: 48px;
+    }
+
+    #center-div {
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+    #add-files li a{
+        width: 2rem;
+        height:2rem;
+        right:initial!important;
     }
 </style>
 <div id="modal2" class="modal bottom-sheet">
@@ -334,19 +364,88 @@
         <div class="col s6">
         </div>
     </div>
+    <div id="div-preloader" class="center" style="width:100%; height:25rem;">
+        <div id="preloader" class="preloader-wrapper big active center" style="margin-top:12.5rem">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <canvas id="previa" width="480" height="360" style="padding: 0; margin: auto; display: block; margin-top: 2rem;"></canvas>
+    <div id="div-docs" class="center" style="height: 25rem;display: table; width:100%">
+        <div id="center-div">
+            <div id="img-doc" class="large material-icons md-48"></div>
+            <div id="name-doc"></div>
+        </div>
+    </div>
     <div class="row center" id="r-paginas">
         <p id="pages-count"></p>
     </div>
-    @*<a class="btn-floating btn-large waves-effect waves-light green" style="position:absolute; z-index:1004; right:2rem; bottom:0.05rem;"><i class="material-icons">send</i></a>*@
+    <a id="send-files" class="btn-floating btn-large waves-effect waves-light green" style="position:absolute; z-index:1004; right:2rem; bottom:0.05rem;"><i class="material-icons">send</i></a>
     <div class="center grey lighten-2">
-        @*<button id="add-file-btn" class="btn white blue-text" style="width:5rem;height:5rem; margin-top:1rem;"><i class="large material-icons">add</i></button>*@
         <div class="row" id="rengLista">
-            <div class="col s12" style="display:inline-flex; padding-bottom:1rem;">
-                    <ul id="add-files" style="margin-left:auto">
-                    </ul>
-                    <div id="add-file-btn" role="button" style="cursor:pointer; margin-right:auto;background-color: white; color: blue;width: 8rem;height:8rem;margin-top:1rem; font-weight:bolder"><span class="material-icons" style="margin-top:2rem;">add</span><div style="margin-bottom:auto">ADD FILE</div></div>  
+            <div class="col s12" id="div-files" style="display:inline-flex; padding-bottom:1rem;">
+                <ul id="add-files" style="margin-left:auto">
+                </ul>
+                <div id="add-file-btn" role="button" style="cursor:pointer; margin-right:auto;background-color: white; color: blue;width: 8rem;height:8rem;margin-top:1rem; font-weight:bolder"><span class="material-icons" style="margin-top:2rem;">add</span><div style="margin-bottom:auto">ADD FILE</div></div>
             </div>
-        </div>      
+        </div>
+    </div>
+</div>
+
+<div id="modal-media" class="modal bottom-sheet">
+    <div class="green row" id="r-encabezado-media" style="height:3rem; margin-bottom:0;">
+        <div class="col s6">
+            <a href="#" id="closeModalMedia"> <span class="material-icons left" style="margin-top:0.8rem; margin-left:0.4rem; color:white;">close</span></a>
+            <h6 style="color:white; padding-left:1rem; padding-top:0.2rem">Preview</h6>
+        </div>
+        <div class="col s6">
+        </div>
+    </div>
+    <div id="div-preloader-media" class="center" style="width:100%; height:25rem;">
+        <div id="preloader-media" class="preloader-wrapper big active center" style="margin-top:12.5rem">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="div-media-container" class="center" style="height: 25rem;width:100%">
+        <div id="center-div-media" style="height:100%; width:75%;display:inline-grid">
+            <img id="media-frame-img" style="display:none;margin:auto; height:10rem; width:10rem" class="responsive-img" src="">
+            <video style="margin:auto" src="" width="320" height="240" class="responsive-video" id="media-frame-video" controls>
+            </video>
+            <div style="">
+                <div class="input-field" style="">
+                    <input id="text_media" type="text" class="validate">
+                    <label for="text_media">Type a comment</label>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    <a id="send-media" class="btn-floating btn-large waves-effect waves-light green" style="position:absolute; z-index:1004; right:2rem; bottom:0.05rem;"><i class="material-icons">send</i></a>
+    <div class="center grey lighten-2">
+        <div class="row" id="rengLista-media">
+            <div class="col s12" id="div-media" style="display:inline-flex; padding-bottom:1rem;">
+                <ul id="add-media" style="margin-left:auto">
+                </ul>
+                <div id="add-media-btn" role="button" style="cursor:pointer; margin-right:auto;background-color: white; color: blue;width: 8rem;height:8rem;margin-top:1rem; font-weight:bolder"><span class="material-icons" style="margin-top:2rem;">add</span><div style="margin-bottom:auto">ADD FILE</div></div>
+            </div>
+        </div>
     </div>
 </div>

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
 namespace Messaging.Controllers
 {
     public class DashController : Controller
@@ -85,7 +87,7 @@ namespace Messaging.Controllers
             var newPath = Path.Combine(webRootPath, folderName);
             string file = Guid.NewGuid() + "-" + HttpContext.Session.GetString("telefono") + ".png";
             string fileNameWitPath = newPath + file;
-          
+
             using (FileStream fs = new FileStream(fileNameWitPath, FileMode.Create))
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
@@ -96,6 +98,22 @@ namespace Messaging.Controllers
                 }
             }
             return file;
+        }
+        [HttpPost]
+        public async Task<string> EnviarMultiplesArchivos()
+        {
+            string uploads = Path.Combine(webHostEnvironment.WebRootPath, "files");
+
+            for (int i = 0; i < Request.Form.Files.Count; i++)
+            {
+                IFormFile archivo = Request.Form.Files[i];
+                var filePath = Path.Combine(uploads, archivo.FileName);
+                using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await archivo.CopyToAsync(fileStream);
+                }
+            }
+            return "Llego";
         }
     }
 }

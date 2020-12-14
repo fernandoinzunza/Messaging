@@ -1,0 +1,57 @@
+﻿@media screen and (max-width:600px) {
+	#messages-list {
+		padding: 0 !important;
+	}
+
+		#messages-list .row {
+			margin-left: 0 !important;
+			margin-right: 0 !important;
+		}
+
+	.enviados, .recibidos {
+		float: none !important;
+		font-size: x-small !important;
+	}
+
+	#contenedor-absoluto {
+		margin: 0!important;
+		top: 0!important;
+		bottom: 0!important;
+	}
+	.imagen-avatar{
+		display:none!important;
+	}
+	.collection .collection-item.avatar{
+		padding-left:2rem;
+	}
+	#modal2{
+	width:100vw!important;
+	height:100vh!important;
+	}
+	#canvas{
+		width:320px!important;
+		height:240px!important;
+	}
+	#video {
+		width: 320px !important;
+		height: 240px !important;
+	}
+	#add-files {
+		overflow-y: auto;
+		max-height: 15rem !important;
+	}
+	#previa{
+		width:240px!important;
+		height:320px!important;
+	}
+	#div-files{
+		display:block!important;
+		
+	}
+	#add-files li{
+		display:block!important;
+		height:initial!important;
+		width:initial!important;
+	}
+	
+}
