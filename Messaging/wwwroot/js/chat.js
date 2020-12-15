@@ -16,10 +16,14 @@
     var contMedia = 0;
     var numArchivos = 0;
     var arregloMedia = [];
+    var arregloMediaArchivos = [];
     var arregloTiposMedia = [];
     var indicesMediaActivos = [];
     let textsMedia = [];
     var numMedia = 0;
+
+    var mediaSeleccionada = -1;
+
     const errorMsgElement = document.querySelector('span#errorMsg');
     $("#enviarFoto").hide();
     $("#retake").hide();
@@ -28,7 +32,7 @@
     let arregloImagenes = [];
     let arregloTipos = [];
     let indicesActivos = [];
-   
+
     var archivoFocused = -1;
     var mediaFocused = -1;
     const constraints = {
@@ -279,6 +283,7 @@
             if (HaHechoClick == "A" && clase == "material-icons quitar") {
                 var index = indicesActivos[$("#" + id).index()];
                 var indexPosicion = $("#" + id).index();
+                mediaSeleccionada = indexPosicion;
                 var indiceSelec = indicesActivos[indicesActivos.length - 1];
                 indicesActivos.splice(indexPosicion, 1);
                 var indexEnf;
@@ -307,7 +312,7 @@
                     else if (indexPosicion >= arregloImagenes.length) {
                         indexPosicion = arregloImagenes.length - 1;
                     }
-                    
+
                     $("#arch-" + indicesActivos[indexPosicion]).find("img").css("border", "1px solid #1b9a59");
                     if (arregloTipos[arregloTipos.length - 1] == "pdf") {
                         var canvas = document.getElementById("previa");
@@ -340,7 +345,7 @@
                     else if (indexPosicion >= arregloImagenes.length) {
                         indexPosicion = arregloImagenes.length - 1;
                     }
-                   
+
                     $("#arch-" + indicesActivos[indexPosicion]).find("img").css("border", "1px solid #1b9a59");
                     archivoFocused = index;
 
@@ -413,6 +418,9 @@
                 var canvas = document.getElementById("previa");
                 var ctx = canvas.getContext("2d");
                 var data = $("#" + id).find("img").attr("data-media");
+                var posicion = $("#" + id).index();
+                mediaSeleccionada = posicion;
+                $("#text_media").val(textsMedia[posicion]);
                 $('#add-media li img').each(function () {
                     $(this).css("border", "none");
                 })
@@ -432,6 +440,7 @@
             else if (HaHechoClick == "A" && clase == "material-icons quitar-media") {
                 var index = indicesMediaActivos[$("#" + id).index()];
                 var indexPosicion = $("#" + id).index();
+                mediaSeleccionada = indexPosicion;
                 var indiceSelec = indicesMediaActivos[indicesMediaActivos.length - 1];
                 indicesMediaActivos.splice(indexPosicion, 1);
                 var indexEnf;
@@ -446,10 +455,12 @@
                 })
                 arregloMedia.splice(indexPosicion, 1);
                 arregloTiposMedia.splice(indexPosicion, 1);
-
+                textsMedia.splice(indexPosicion, 1);
+                arregloMediaArchivos.splice(indexPosicion, 1);
 
                 if (index == arregloMedia.length) {
                     mediaFocused = index
+
                     $("#media-" + indicesMediaActivos[indexPosicion]).find("img").css("border", "1px solid #1b9a59");
                     if (arregloMedia.length == 1) {
                         indexPosicion = 0;
@@ -457,6 +468,7 @@
                     else if (indexPosicion >= arregloMedia.length) {
                         indexPosicion = arregloMedia.length - 1;
                     }
+                    $("#text_media").val(textsMedia[indexPosicion]);
                     if (arregloTiposMedia[arregloTiposMedia.length - 1] == "imagen") {
                         $("#media-frame-img").attr("src", arregloMedia[arregloMedia.length - 1])
                         $("#media-frame-video").hide();
@@ -470,6 +482,7 @@
                 }
                 else if (mediaFocused == index && mediaFocused != arregloMedia.length) {
                     $("#media-" + indicesMediaActivos[indexPosicion]).find("img").css("border", "1px solid #1b9a59");
+
                     mediaFocused = index
                     if (arregloMedia.length == 1) {
                         indexPosicion = 0;
@@ -477,6 +490,7 @@
                     else if (indexPosicion >= arregloMedia.length) {
                         indexPosicion = arregloMedia.length - 1;
                     }
+                    $("#text_media").val(textsMedia[indexPosicion]);
                     if (arregloTiposMedia[indexPosicion] == "imagen") {
                         $("#media-frame-img").attr("src", arregloMedia[indexPosicion])
                         $("#media-frame-video").hide();
@@ -1275,8 +1289,18 @@
     })
     $("#add-media-btn").click(function () {
         textsMedia.push($("#text_media").val());
+        $("#text_media").val();
         $("#input-photos").click();
     })
+    $("#text_media").on("keyup", function () {
+        if (textsMedia.length == 0)
+            textsMedia.push($("#text_media").val())
+        else if (textsMedia.length < arregloMedia.length)
+            textsMedia.push($("#text_media").val())
+        else
+            textsMedia[mediaSeleccionada] = $("#text_media").val();
+    })
+
     $("#input-photos").on("change", function (e) {
         $("#div-media-container").hide();
         $("#preloader-media").addClass("active");
@@ -1288,7 +1312,7 @@
         instance.open();
         var file = e.target.files[0];
         var tipo = "";
-        if (file.type == "image/jpeg" || file.type == "image/png")
+        if (file.type == "image/jpeg" || file.type == "image/png" || file.type == "image/jpg")
             tipo = "imagen";
         else
             tipo = 'video';
@@ -1369,11 +1393,126 @@
             fileReader.readAsArrayBuffer(file);
 
         }
-
+        mediaSeleccionada = $('ul#add-media li').length - 1;
+        $("#text_media").val('')
+        arregloMediaArchivos.push(file);
         arregloMedia.push(archivoMedia);
         arregloTiposMedia.push(tipo);
         numMedia++;
         mediaFocused = contMedia - 1;
+    })
+    $("#send-media").click(function () {
+        var formData = new FormData();
+        for (var i = 0; i < arregloMediaArchivos.length; i++) {
+            formData.append("media-" + i, arregloMediaArchivos[i]);
+        }
+        $.ajax({
+            url: '/Dash/EnviarMultiplesArchivos',
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (data) { },
+            error: function (err) { console.log(err); alert(err) }
+        });
+        var destino = $("#destinoFocused").val()
+        var yo = $("#telSession").val()
+        var lista = [];
+        for (var i = 0; i < arregloMediaArchivos.length; i++) {
+            lista.push(arregloMediaArchivos[i].name);
+        }
+        $.ajax({
+            url: '/Dash/IsConnected',
+            method: "POST",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="RequestVerificationToken"]').val());
+            },
+            data:
+            {
+                tel: destino
+            },
+            success: function (data) {
+                if (data == 1) {
+                    for (var i = 0; i < lista.length; i++) {
+                        var esVideo = /.mp4|.webm|.mkv|.wmv$/.test(lista[i]);
+                        var esImagen = /.png|.jpg|.jpeg$/.test(lista[i]);
+
+                        if (colaEnviado) {
+                            if (esVideo)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Entregado' style='width:100%;'><span width='8' height='13' style='float:right'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 17' width='8' height='17'><path opacity='.13' d='M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z'></path><path fill='#dcedc8' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'></path></svg></span><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><video class='responsive-video' controls><source src='../../files/" + lista[i] + "' type='video/mp4'></video><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>done_all</i></div></div></div></div>");
+                            else if (esImagen)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Entregado' style='width:100%;'><span width='8' height='13' style='float:right'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 17' width='8' height='17'><path opacity='.13' d='M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z'></path><path fill='#dcedc8' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'></path></svg></span><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><img class='responsive-img' src='../../files/" + lista[i] + "' /><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>done_all</i></div></div></div></div>");
+                            colaEnviado = false;
+                        }
+                        else {
+                            if (esVideo)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Entregado' style='width:100%;'><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; margin-right:0.5rem; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><video class='responsive-video' controls><source src='" + lista[i] + "' type='video/mp4'></video><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>done_all</i></div></div></div></div>");
+                            else if (esImagen)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Entregado' style='width:100%;'><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; margin-right:0.5rem; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><img class='responsive-img' src='../../files/" + lista[i] + "' /><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>done_all</i></div></div></div></div>");
+                            colaRecibido = true;
+                        }
+                    }
+                    var vacio = true;
+
+                    connection.invoke("EnviarMedia", lista, textsMedia, destino, yo).catch(function (err) {
+                        return alert(err.toString())
+                        console.log('error al enviar');
+                    })
+                    var selectedLi = $("#li-" + destino);
+                    $("#ul-izq").prepend(selectedLi);
+                    $("#messages-list").scrollTop($("#messages-list")[0].scrollHeight);
+                    //$("#ult-" + user).css("font-style", "italic");
+                    //$("#ult-" + user).html("<i class='tiny material-icons'>done_all</i>Sent an image");
+
+                }
+                else {
+                    for (var i = 0; i < lista.length; i++) {
+                        var esVideo = /.mp4|.webm|.mkv|.wmv$/.test(lista[i]);
+                        var esImagen = /.png|.jpg|.jpeg$/.test(lista[i]);
+                        if (colaEnviado) {
+                            if (esVideo)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Enviado' style='width:100%;'><span width='8' height='13' style='float:right'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 17' width='8' height='17'><path opacity='.13' d='M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z'></path><path fill='#dcedc8' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'></path></svg></span><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><video class='responsive-video' controls><source src='" + lista[i] + "' type='video/mp4'></video><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>check</i></div></div></div></div>");
+                            else if (esImagen)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Enviado' style='width:100%;'><span width='8' height='13' style='float:right'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 17' width='8' height='17'><path opacity='.13' d='M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z'></path><path fill='#dcedc8' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'></path></svg></span><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px;max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><img class='responsive-img' src='../../files/" + lista[i] + "' /><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>check</i></div></div></div></div>");
+                            colaEnviado = false;
+                        }
+                        else {
+                            if (esVideo)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Enviado' style='width:100%;'><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; margin-right:0.5rem; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><video class='responsive-video' controls><source src='" + lista[i] + "' type='video/mp4'></video><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>check</i></div></div></div></div>");
+                            else if (esImagen)
+                                $("#messages-list").append("<div class='row enviados state' data-state='Enviado' style='width:100%;'><div class='light-green lighten-4' style='border-radius:2px 0 2px 2px; margin-right:0.5rem; max-width:18rem; width:auto; float:right; padding-left: 0.5rem; padding-right:0.5rem;position:relative;'><div style=' word-wrap: break-word;'><img class='responsive-img' src='../../files/" + lista[i] + "' /><div style='position:relative; bottom:0;'>" + textsMedia[i] + "<i class='tiny material-icons' style='color:grey;margin-left:1rem; position:absolute; z-index:1; right:0.5rem; bottom:0'>check</i></div></div></div></div>");
+                            colaRecibido = true;
+                        }
+
+                    }
+                    connection.invoke("SendDisconnectedMedia", lista, textsMedia, destino, yo).catch(function (err) {
+                        return alert(err.toString())
+                        console.log('error al enviar');
+                    })
+                    $("#mensaje").val('');
+                    var selectedLi = $("#li-" + destino);
+                    $("#ul-izq").prepend(selectedLi);;
+                    //$("#ult-" + user).html("<i class='tiny material-icons'>check</i>" + "Sent an image");
+                }
+                $("#messages-list").scrollTop($("#messages-list")[0].scrollHeight);
+                arregloMedia = [];
+                textsMedia = [];
+                arregloTiposMedia = [];
+                mediaFocused = -1;
+                $("#text_media").val('')
+                indicesActivosMedia = [];
+                contMedia = 0;
+                numMedia = 0;
+                $("#add-media").html('');
+                mediaSeleccionada = -1;
+                arregloMediaArchivos = [];
+                var modal = $("#modal-media");
+                var instance = M.Modal.getInstance(modal);
+                instance.close();
+
+            }
+        });
     })
 })
 function quitar() {
